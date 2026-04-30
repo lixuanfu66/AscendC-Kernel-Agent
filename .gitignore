@@ -40,6 +40,9 @@ dist/
 # Local test sessions — test.md is session-scoped, reports are kept
 test.md
 
+# Local upstream references
+external/
+
 # torch_npu runtime artifacts (generated on any NPU Python run)
 fusion_result.json
 kernel_meta/

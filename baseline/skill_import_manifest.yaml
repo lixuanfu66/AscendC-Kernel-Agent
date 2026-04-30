@@ -1,0 +1,112 @@
+# Skill import manifest for the CANN Agent baseline.
+
+upstreams:
+  ascendc_kernel_agent:
+    path: .
+    role: mainline_agent_evolution_framework
+  cann_skills:
+    path: external/cann-skills
+    role: upstream_skill_and_knowledge_source
+
+already_present_core:
+  - name: ascendc-docs-search
+    source: external/cann-skills/ops/ascendc-docs-search
+    present_at: .claude/skills/ascendc-docs-search
+    target: .claude/skills/ascendc-docs-search
+    use_in: [architect, developer, reviewer, memory_extractor]
+    purpose: API docs, examples, compatibility, source citations
+
+  - name: ascendc-api-best-practices
+    source: external/cann-skills/ops/ascendc-api-best-practices
+    present_at: .claude/skills/ascendc-api-best-practices
+    target: .claude/skills/ascendc-api-best-practices
+    use_in: [architect, developer, reviewer, long_term_memory]
+    purpose: API constraints, DataCopyPad, buffers, pipeline, precision APIs
+
+  - name: ascendc-tiling-design
+    source: external/cann-skills/ops/ascendc-tiling-design
+    present_at: .claude/skills/ascendc-tiling-design
+    target: .claude/skills/ascendc-tiling-design
+    use_in: [architect, developer, reviewer, strategy_pool]
+    purpose: operator classification, tiling, UB split, buffer planning
+
+  - name: ascendc-npu-arch
+    source: external/cann-skills/ops/ascendc-npu-arch
+    present_at: .claude/skills/ascendc-npu-arch
+    target: .claude/skills/ascendc-npu-arch
+    use_in: [architect, developer, verifier]
+    purpose: chip metadata, arch-specific decisions, compile config
+
+  - name: ascendc-env-check
+    source: external/cann-skills/ops/ascendc-env-check
+    present_at: .claude/skills/ascendc-env-check
+    target: .claude/skills/ascendc-env-check
+    use_in: [tester, verifier]
+    purpose: NPU and CANN environment preflight
+
+  - name: ops-precision-standard
+    source: external/cann-skills/ops/ops-precision-standard
+    present_at: .claude/skills/ops-precision-standard
+    target: .claude/skills/ops-precision-standard
+    use_in: [tester, reviewer, verifier]
+    purpose: dtype-specific correctness thresholds and edge cases
+
+  - name: ascendc-precision-debug
+    source: external/cann-skills/ops/ascendc-precision-debug
+    present_at: .claude/skills/ascendc-precision-debug
+    target: .claude/skills/ascendc-precision-debug
+    use_in: [developer, tester, memory_extractor]
+    purpose: correctness failure diagnosis and repair hints
+
+  - name: ascendc-runtime-debug
+    source: external/cann-skills/ops/ascendc-runtime-debug
+    present_at: .claude/skills/ascendc-runtime-debug
+    target: .claude/skills/ascendc-runtime-debug
+    use_in: [developer, tester, memory_extractor]
+    purpose: runtime error diagnosis, error codes, plog parsing
+
+  - name: ops-profiling
+    source: external/cann-skills/ops/ops-profiling
+    present_at: .claude/skills/ops-profiling
+    target: .claude/skills/ops-profiling
+    use_in: [tester, architect, supervisor, strategy_pool]
+    purpose: msprof collection, bottleneck analysis, optimization quickref
+
+  - name: ascendc-code-review
+    source: external/cann-skills/ops/ascendc-code-review
+    present_at: .claude/skills/ascendc-code-review
+    target: .claude/skills/ascendc-code-review
+    use_in: [reviewer]
+    purpose: static review, API checks, style, performance risks
+
+keep_from_mainline:
+  - name: ascendc-msopgen-workflow
+    source: .claude/skills/ascendc-msopgen-workflow
+    reason: custom operator pipeline contains practical msopgen pitfalls not present in cann-skills ops list
+
+optional_phase_2:
+  already_present:
+    - ascendc-direct-invoke-template
+    - ascendc-registry-invoke-to-direct-invoke
+    - ascendc-st-design
+    - ascendc-ut-develop
+    - ascendc-whitebox-design
+  missing_from_mainline_candidate_import:
+    - torch-ascendc-op-extension
+    - ascendc-docs-gen
+    - ascendc-performance-best-practices
+    - ascendc-regbase-best-practice
+
+sync_policy:
+  status: core_skills_already_present
+  next_action: compare_root_mainline_skills_with_cann_skills_upstream_and_sync_only_when_upstream_has_useful_updates
+  notes:
+    - Do not duplicate-import the 10 core skills.
+    - Treat external/cann-skills as upstream for version/diff audit.
+    - Preserve AscendC-Kernel-Agent local additions such as ascendc-kb-docs and ascendc-msopgen-workflow.
+
+defer:
+  - pypto-*
+  - model/*
+  - ops-simulator
+  - torch-ops-profiler
