@@ -126,3 +126,38 @@
 ### 结论
 
 不整体搬移 CannBot 的 `.md` 文档。项目内保留工作记忆、工程上下文和共享知识索引；跨项目共享库只沉淀稳定、可复用、与单个仓库实现弱绑定的知识。
+## 2026-04-30 远端 GELU 算子流程测试
+
+### 环境
+
+- SSH：`ascend-a3`，实际目标 `root@113.46.4.206:101`
+- Docker：`claude_sz_1`
+- 项目路径：`/data/l00821447/AscendC-Kernel-Agent`
+- Conda 环境：`/root/miniconda3/envs/cannbot`
+- CANN：`/usr/local/Ascend/ascend-toolkit/set_env.sh`
+
+### 已完成
+
+- 在远端 `workspace/runs/gelu_custom/attempts/step_0` 创建 GELU seed 候选。
+- 使用 `msopgen` 生成 `GeluCustom` 自定义算子工程。
+- 修复目标芯片配置：默认生成的 `ascend910` / `ascend910b` 均不能匹配当前 runtime，需要使用 `ascend910_93`。
+- 补充基础 AscendC GELU kernel，使用 tanh 近似公式：
+  `0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3)))`
+- 完整运行：
+  `bash scoring/score.sh workspace/runs/gelu_custom/attempts/step_0 scoring/configs/gelu_custom.json`
+
+### 结果
+
+- score JSON：`/data/l00821447/AscendC-Kernel-Agent/evolution/scores/v0.json`
+- 日志目录：`/data/l00821447/AscendC-Kernel-Agent/evolution/logs/step_0`
+- `correctness_total`: `1.0`
+- `performance_total`: `82.2`
+- boundary/smoke/representative 正确性均通过。
+- representative 性能：
+  - `medium_fp32 [1048576]`: `82.515 us`
+  - `medium_fp16 [1048576]`: `78.257 us`
+  - `medium_2d_fp32 [1024,1024]`: `86.224 us`
+
+### 结论
+
+在 `cannbot` conda 环境中，GELU 自定义算子从 JSON 生成、编译、部署、PyTorch CppExtension 构建、正确性测试和代表性性能测试已经走通。下一步可以把 `ascend910_93` 识别和 msopgen 产物修复固化到项目脚本中，再进入性能优化迭代。
